@@ -15,18 +15,6 @@ from selenium.webdriver.common.keys import Keys
 
 import time
 
-#МОС.РУ горячая вода
-log="+79771234567" # логин 
-passwd="pass"    # и пароль на сайт мос.ру
-water="0.123" #показания горячей воды
-# МОЭК
-chet="80010xxxxx" # номер лицевого счета
-kv="12" #номер квартиры
-
-
-
-
-
 def get_adb_devices():
     try:
         result = subprocess.run(
@@ -101,7 +89,129 @@ def loopsms(output_queue, check_interval=10):
             print(f"Ошибка: {str(e)}")
             time.sleep(check_interval)
 
-def mos_ru_hot_water():
+if __name__ == "__main__":
+
+
+
+    #Мосводоканал
+    log="+79771234567"
+    passwd="pass"
+    water="0.1"
+    options = Options()
+    options.set_preference("dom.webdriver.enabled", False)  # Скрываем автоматизацию  
+    options.set_preference("useAutomationExtension", False)
+    
+    gecko_path="/home/odity/Downloads/geckodriver-v0.36.0-linux64/geckodriver"
+    service = Service(executable_path=gecko_path,options=options)
+    driver = webdriver.Firefox(service=service)
+    driver.get(f"https://onewind.mosvodokanal.ru/#loginview")
+    
+    
+    add = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "button-1016-btnInnerEl"))
+    )
+    
+    #add = driver.find_element(By.ID, ".button-1016-btnInnerEl") #login
+    add.click()
+    time.sleep(1)
+    
+    #add = driver.find_element(By.CSS_SELECTOR, "input#login") #login
+    
+    add = driver.find_element(By.CSS_SELECTOR, "input[data-ref='inputEl'][name='login']") #login
+    add.clear()
+    add = add.send_keys(log)
+    
+    time.sleep(1)
+    add = driver.find_element(By.CSS_SELECTOR, "input[data-ref='inputEl'][name='pass']") #passwd
+    add.clear()
+    add = add.send_keys(passwd)
+    
+    button = WebDriverWait(driver, 3).until( EC.element_to_be_clickable((   By.XPATH, 
+            "//span[contains(@class, 'x-btn-inner-login-button-large') "
+            "and contains(text(), 'ВОЙТИ В ЛИЧНЫЙ КАБИНЕТ')]" )) )
+    
+    # Кликнуть через JavaScript для обхода возможных перекрытий
+    driver.execute_script("arguments[0].click();", button)  #button press
+    
+    time.sleep(3)
+    button = WebDriverWait(driver, 2).until(
+    EC.element_to_be_clickable((
+        By.XPATH, 
+        "//span[contains(@class, 'x-tab-inner') and text()='Передача показаний']"
+    )))
+    button.click()
+    time.sleep(1) #кликается а дальше надо проверять
+    
+    
+    element = WebDriverWait(driver, 2).until(
+        lambda d: d.find_element(By.CSS_SELECTOR, "input[data-ref='inputEl']")
+    )
+    
+    driver.execute_script("arguments[0].removeAttribute('readonly')", element)
+    
+    # Вводим значение
+    element.clear()
+    #element.send_keys("0")    #1
+    
+    input_field = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((
+            By.CSS_SELECTOR, 
+            "div[data-ref='inputWrap'] > input[data-ref='inputEl']"
+        ))
+    )
+
+    # Снять атрибут readonly (если требуется ввод)
+    driver.execute_script("arguments[0].removeAttribute('readonly')", input_field)
+    
+    # Ввод значения
+    input_field.clear() #2
+    
+    
+    driver.close();
+
+
+
+
+    # Мосэнергосбыт
+    log="+79771234567"
+    passwd="pass"
+    water="0.1"
+    options = Options()
+    options.set_preference("dom.webdriver.enabled", False)  # Скрываем автоматизацию  
+    options.set_preference("useAutomationExtension", False)
+    
+    gecko_path="/home/odity/Downloads/geckodriver-v0.36.0-linux64/geckodriver"
+    service = Service(executable_path=gecko_path,options=options)
+    driver = webdriver.Firefox(service=service)
+    driver.get(f"https://my.mosenergosbyt.ru/auth")
+    
+    
+    add = driver.find_element(By.CSS_SELECTOR, "input[testid='-login']") #login
+    add.clear()
+    add = add.send_keys(log)
+    
+    time.sleep(1)
+    add = driver.find_element(By.CSS_SELECTOR, "input[testid='-password']") #passwd
+    add.clear()
+    add = add.send_keys(passwd)
+    add = driver.find_element(By.CSS_SELECTOR, "button[type='submit'][testid='loginButtonLogin']").click() #button 
+    time.sleep(1)
+    #авторизовались. дальше ждать 15 числа
+    time.sleep(1200)
+    
+    driver.close();
+    
+    
+    
+    
+    
+    
+    #МОС.РУ горячая вода
+    
+    
+    log="+79771234567"
+    passwd="pass"
+    water="0.1"
     options = Options()
     options.set_preference("dom.webdriver.enabled", False)  # Скрываем автоматизацию  
     options.set_preference("useAutomationExtension", False)
@@ -136,12 +246,16 @@ def mos_ru_hot_water():
 
     add = driver.find_element(By.CSS_SELECTOR, 'button.css-6xxhy1-Button-Text-Box').click() #next button
     time.sleep(1)
+    driver.close();
     #PROFIT
+    
 
-def moek():
-    #    # МОЭК
-    #    chet="8001000177"
-    #    kv="51"
+    
+    time.sleep(1200)
+
+    # МОЭК
+    chet="8001000177" #номер лицевого счета
+    kv="11" #квартира
     #driver = webdriver.Firefox()
     options = Options()
     options.set_preference("dom.webdriver.enabled", False)  # Скрываем автоматизацию  
@@ -186,8 +300,8 @@ def moek():
     #pyautogui.press('enter')      # Enter 
     time.sleep(1)
     
-    v1="0.316"
-    v2="0.0018"
+    v1="0.316" #показания 1
+    v2="0.0018"#показания 2
     
     add = driver.find_element(By.CSS_SELECTOR, 'input.form__input-number[name="currentValue0"]')
     #add = driver.find_element(By.ID, 'form__input-number')
@@ -205,8 +319,12 @@ def moek():
     add = driver.find_element(By.CSS_SELECTOR, 'button.button.button__pos_next.button__col_blue').click()
     pyautogui.press('enter')      # Enter
     time.sleep(1)
+    driver.close();
+    
+    #time.sleep(1200)
 
-def sms_code():
+
+    #sms_read_code
     message_queue = queue.Queue()
     monitor_thread = threading.Thread(
         target=loopsms,
@@ -215,9 +333,3 @@ def sms_code():
     )
     monitor_thread.start()
     print(message_queue.get())
-
-
-if __name__ == "__main__":
-
-    moek()
-    mos_ru_hot_water()
